@@ -1,12 +1,15 @@
 using UnityEngine;
+using System;
 
 public class GridPosition : MonoBehaviour
 {
     [SerializeField] Vector2Int Position;
 
-    
+    public static event Action<GameManager.PlayerType, GridPosition, Vector2Int> GridClicked;
+
+
     private void OnMouseDown()
     {
-        GameManager.instance.ManageGridClick(Position);
+        GridClicked?.Invoke(GameManager.instance.playerType, this, Position);
     }
 }
