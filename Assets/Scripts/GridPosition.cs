@@ -2,15 +2,11 @@ using UnityEngine;
 
 public class GridPosition : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-        
-    }
+    [SerializeField] Vector2Int Position;
 
-    // Update is called once per frame
-    void Update()
+    
+    private void OnMouseDown()
     {
-        
+        GameManager.instance.ManageGridClick(Position);
     }
 }
