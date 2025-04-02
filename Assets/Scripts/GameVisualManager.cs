@@ -8,25 +8,32 @@ public class GameVisualManager : NetworkBehaviour
     [SerializeField] Transform CrossPrefab;
     [SerializeField] Transform CirclePrefab;
 
-    void OnEnable()
+    public static GameVisualManager Instance { get; private set; }
+    void Awake()
     {
-        GridPosition.GridClicked += ManageGridVisuals;
+        if (Instance == null)
+        {
+            Instance = this;
+        }
+        else
+        {
+            Destroy(this.gameObject);
+        }
     }
 
-    void ManageGridVisuals(GameManager.PlayerType playerType, GridPosition gridPosition, Vector2Int position)
+    public void ManageGridVisuals(GameManager.PlayerType playerType, Vector3 position)
     {
-        SpawnObjectRpc(playerType, gridPosition.transform.position);
+        SpawnObjectRpc(playerType, position);
     }
 
     [Rpc(SendTo.Server)]
     void SpawnObjectRpc(GameManager.PlayerType playerType, Vector2 pos)
     {
+        print(GameManager.instance.CurrentPlayerType.Value + " " + playerType);
+        if (GameManager.instance.CurrentPlayerType.Value != playerType)
+            return;
+
         Transform obj = Instantiate(playerType == GameManager.PlayerType.Cross ? CrossPrefab : CirclePrefab, pos, quaternion.identity);
         obj.GetComponent<NetworkObject>().Spawn(true);
-    }
-
-    void OnDisable()
-    {
-        GridPosition.GridClicked -= ManageGridVisuals;
     }
 }
