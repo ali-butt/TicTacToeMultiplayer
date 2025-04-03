@@ -29,7 +29,6 @@ public class GameVisualManager : NetworkBehaviour
     [Rpc(SendTo.Server)]
     void SpawnObjectRpc(GameManager.PlayerType playerType, Vector2 pos)
     {
-        print(GameManager.instance.CurrentPlayerType.Value + " " + playerType);
         if (GameManager.instance.CurrentPlayerType.Value != playerType)
             return;
 
