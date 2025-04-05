@@ -2,6 +2,7 @@ using UnityEngine;
 using Unity.Netcode;
 using System;
 using System.Linq;
+using UnityEngine.UIElements;
 
 public class GameManager : NetworkBehaviour
 {
@@ -15,6 +16,14 @@ public class GameManager : NetworkBehaviour
 
     public event EventHandler OnGameStarted;
     public event EventHandler OnTurnChanged;
+
+    public event EventHandler<GameWiningArgs> OnGameWin;
+
+    public class GameWiningArgs : EventArgs
+    {
+        public Transform trans;
+    }
+
 
     private void Awake()
     {
@@ -48,31 +57,70 @@ public class GameManager : NetworkBehaviour
 
         CurrentPlayerType.Value = (PlayerType)Mathf.Clamp(((int)CurrentPlayerType.Value + 1) % Enum.GetValues(typeof(PlayerType)).Length, 1, 2);
 
-        if (IsThereAWinner())
+        Transform trans = IsThereAWinner();
+        if (trans.position != Vector3.zero)
         {
             CurrentPlayerType.Value = PlayerType.none;
+
+            OnGameWin?.Invoke(this, new GameWiningArgs { trans = trans });
+        }
+        else
+        {
+            Destroy(trans.gameObject);
         }
     }
 
-    bool IsThereAWinner()
+    Transform IsThereAWinner()
     {
-        return
-        (playerTypesArray[0, 0] != PlayerType.none && Enumerable.Range(0, playerTypesArray.GetLength(1)).Select(x => playerTypesArray[0, x]).ToArray().Distinct().Count() == 1)
-        ||
-        (playerTypesArray[1, 0] != PlayerType.none && Enumerable.Range(0, playerTypesArray.GetLength(1)).Select(x => playerTypesArray[1, x]).ToArray().Distinct().Count() == 1)
-        ||
-        (playerTypesArray[2, 0] != PlayerType.none && Enumerable.Range(0, playerTypesArray.GetLength(1)).Select(x => playerTypesArray[2, x]).ToArray().Distinct().Count() == 1)
-        ||
-        (playerTypesArray[0, 0] != PlayerType.none && Enumerable.Range(0, playerTypesArray.GetLength(0)).Select(x => playerTypesArray[x, 0]).ToArray().Distinct().Count() == 1)
-        ||
-        (playerTypesArray[0, 1] != PlayerType.none && Enumerable.Range(0, playerTypesArray.GetLength(0)).Select(x => playerTypesArray[x, 1]).ToArray().Distinct().Count() == 1)
-        ||
-        (playerTypesArray[0, 2] != PlayerType.none && Enumerable.Range(0, playerTypesArray.GetLength(0)).Select(x => playerTypesArray[x, 2]).ToArray().Distinct().Count() == 1)
-        ||
-        ((playerTypesArray[0, 0] != PlayerType.none) && (playerTypesArray[0, 0] == playerTypesArray[1, 1]) && (playerTypesArray[1, 1] == playerTypesArray[2, 2]))
-        ||
-        ((playerTypesArray[2, 0] != PlayerType.none) && (playerTypesArray[2, 0] == playerTypesArray[1, 1]) && (playerTypesArray[1, 1] == playerTypesArray[0, 2]))
-        ;
+        GameObject temp = new GameObject("tempppppppppppppppppppp");
+        temp.transform.localScale = new Vector3(6, 0, 0);
+
+        if (playerTypesArray[0, 0] != PlayerType.none && Enumerable.Range(0, playerTypesArray.GetLength(1)).Select(x => playerTypesArray[0, x]).ToArray().Distinct().Count() == 1)
+        {
+            temp.transform.position = new Vector3(0, -4.7f, 0);
+            temp.transform.rotation = Quaternion.identity;
+        }
+        else if (playerTypesArray[1, 0] != PlayerType.none && Enumerable.Range(0, playerTypesArray.GetLength(1)).Select(x => playerTypesArray[1, x]).ToArray().Distinct().Count() == 1)
+        {
+            temp.transform.position = new Vector3(0, -1.6f, 0);
+            temp.transform.rotation = Quaternion.identity;
+        }
+        else if (playerTypesArray[2, 0] != PlayerType.none && Enumerable.Range(0, playerTypesArray.GetLength(1)).Select(x => playerTypesArray[2, x]).ToArray().Distinct().Count() == 1)
+        {
+            temp.transform.position = new Vector3(0, 1.5f, 0);
+            temp.transform.rotation = Quaternion.identity;
+        }
+        else if (playerTypesArray[0, 0] != PlayerType.none && Enumerable.Range(0, playerTypesArray.GetLength(0)).Select(x => playerTypesArray[x, 0]).ToArray().Distinct().Count() == 1)
+        {
+            temp.transform.position = new Vector3(-3.1f, -1.6f, 0);
+            temp.transform.rotation = Quaternion.Euler(0, 0, 90);
+        }
+        else if (playerTypesArray[0, 1] != PlayerType.none && Enumerable.Range(0, playerTypesArray.GetLength(0)).Select(x => playerTypesArray[x, 1]).ToArray().Distinct().Count() == 1)
+        {
+            temp.transform.position = new Vector3(0, -1.6f, 0);
+            temp.transform.rotation = Quaternion.Euler(0, 0, 90);
+        }
+        else if (playerTypesArray[0, 2] != PlayerType.none && Enumerable.Range(0, playerTypesArray.GetLength(0)).Select(x => playerTypesArray[x, 2]).ToArray().Distinct().Count() == 1)
+        {
+            temp.transform.position = new Vector3(3.1f, -1.6f, 0);
+            temp.transform.rotation = Quaternion.Euler(0, 0, 90);
+        }
+        else if ((playerTypesArray[0, 0] != PlayerType.none) && (playerTypesArray[0, 0] == playerTypesArray[1, 1]) && (playerTypesArray[1, 1] == playerTypesArray[2, 2]))
+        {
+            temp.transform.position = new Vector3(0, -1.6f, 0);
+            temp.transform.rotation = Quaternion.Euler(0, 0, 45);
+        }
+        else if ((playerTypesArray[2, 0] != PlayerType.none) && (playerTypesArray[2, 0] == playerTypesArray[1, 1]) && (playerTypesArray[1, 1] == playerTypesArray[0, 2]))
+        {
+            temp.transform.position = new Vector3(0, -1.6f, 0);
+            temp.transform.rotation = Quaternion.Euler(0, 0, -45);
+        }
+        else
+        {
+            temp.transform.position = new Vector3(0, 0, 0);
+        }
+
+        return temp.transform;
     }
 
 

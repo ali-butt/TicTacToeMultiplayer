@@ -7,6 +7,7 @@ public class GameVisualManager : NetworkBehaviour
 {
     [SerializeField] Transform CrossPrefab;
     [SerializeField] Transform CirclePrefab;
+    [SerializeField] Transform GreenLinePrefab;
 
     public static GameVisualManager Instance { get; private set; }
     void Awake()
@@ -19,6 +20,18 @@ public class GameVisualManager : NetworkBehaviour
         {
             Destroy(this.gameObject);
         }
+    }
+
+    void Start()
+    {
+        GameManager.instance.OnGameWin += SpawnGreenLine;
+    }
+
+    void SpawnGreenLine(object sender, GameManager.GameWiningArgs e)
+    {
+        Instantiate(GreenLinePrefab, e.trans.position, e.trans.rotation).GetComponent<NetworkObject>().Spawn(true);
+
+        Destroy(e.trans.gameObject);
     }
 
     public void ManageGridVisuals(GameManager.PlayerType playerType, Vector3 position)
