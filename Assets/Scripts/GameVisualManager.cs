@@ -29,9 +29,12 @@ public class GameVisualManager : NetworkBehaviour
 
     void SpawnGreenLine(object sender, GameManager.GameWiningArgs e)
     {
-        Instantiate(GreenLinePrefab, e.trans.position, e.trans.rotation).GetComponent<NetworkObject>().Spawn(true);
+        if (NetworkManager.Singleton.IsServer)
+        {
+            Instantiate(GreenLinePrefab, e.trans.position, e.trans.rotation).GetComponent<NetworkObject>().Spawn(true);
 
-        Destroy(e.trans.gameObject);
+            Destroy(e.trans.gameObject);
+        }
     }
 
     public void ManageGridVisuals(GameManager.PlayerType playerType, Vector3 position)

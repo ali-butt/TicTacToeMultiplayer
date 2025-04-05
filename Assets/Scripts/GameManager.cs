@@ -55,19 +55,32 @@ public class GameManager : NetworkBehaviour
 
         GameVisualManager.Instance.ManageGridVisuals(type, new Vector3(x, y, 0));
 
-        CurrentPlayerType.Value = (PlayerType)Mathf.Clamp(((int)CurrentPlayerType.Value + 1) % Enum.GetValues(typeof(PlayerType)).Length, 1, 2);
-
         Transform trans = IsThereAWinner();
         if (trans.position != Vector3.zero)
         {
-            CurrentPlayerType.Value = PlayerType.none;
+            WinTriggerRpc(trans.position, trans.rotation.eulerAngles);
 
-            OnGameWin?.Invoke(this, new GameWiningArgs { trans = trans });
+            CurrentPlayerType.Value = PlayerType.none;
         }
         else
         {
             Destroy(trans.gameObject);
+
+            CurrentPlayerType.Value = (PlayerType)Mathf.Clamp(((int)CurrentPlayerType.Value + 1) % Enum.GetValues(typeof(PlayerType)).Length, 1, 2);
         }
+
+    }
+
+    [Rpc(SendTo.ClientsAndHost)]
+    void WinTriggerRpc(Vector3 pos, Vector3 rot)
+    {
+        GameObject temp = new GameObject("lolo");
+        temp.transform.position = pos;
+        temp.transform.rotation = Quaternion.Euler(rot);
+
+        OnGameWin?.Invoke(this, new GameWiningArgs { trans = temp.transform });
+
+        Destroy(temp);
     }
 
     Transform IsThereAWinner()
@@ -148,7 +161,8 @@ public class GameManager : NetworkBehaviour
     {
         playerType = NetworkManager.Singleton.LocalClientId == 0 ? PlayerType.Cross : PlayerType.Circle;
 
-        CurrentPlayerType.Value = IsServer ? PlayerType.Cross : PlayerType.Circle;
+        if (NetworkManager.Singleton.IsServer)
+            CurrentPlayerType.Value = PlayerType.Cross;
 
         if (IsServer)
         {
