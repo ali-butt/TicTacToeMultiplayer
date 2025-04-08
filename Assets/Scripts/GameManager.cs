@@ -17,6 +17,8 @@ public class GameManager : NetworkBehaviour
     public event EventHandler OnGameStarted;
     public event EventHandler OnTurnChanged;
 
+    public event EventHandler OnRematch;
+
     public event EventHandler<GameWiningArgs> OnGameWin;
 
     public class GameWiningArgs : EventArgs
@@ -149,6 +151,21 @@ public class GameManager : NetworkBehaviour
     void GameStartedRpc()
     {
         OnGameStarted?.Invoke(this, EventArgs.Empty);
+    }
+
+    [Rpc(SendTo.ClientsAndHost)]
+    public void RematchRpc()
+    {
+        for (int i = 0; i < playerTypesArray.GetLength(0); i++)
+        {
+            for (int j = 0; j < playerTypesArray.GetLength(1); j++)
+                playerTypesArray[i, j] = PlayerType.none;
+        }
+
+        if (IsServer)
+            CurrentPlayerType.Value = (PlayerType)UnityEngine.Random.Range(1, 3);
+
+        OnRematch?.Invoke(this, EventArgs.Empty);
     }
 
 
